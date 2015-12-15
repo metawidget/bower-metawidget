@@ -1,4 +1,4 @@
-// Metawidget 4.1
+// Metawidget 4.2
 //
 // This file is dual licensed under both the LGPL
 // (http://www.gnu.org/licenses/lgpl-2.1.html) and the EPL
@@ -217,20 +217,23 @@ var metawidget = metawidget || {};
 				length = widget.childNodes.length;
 				for ( loop = 0; loop < length; loop++ ) {
 					var childNode = widget.childNodes[loop];
+					if ( childNode.tagName === 'DIV' ) {
+						childNode = childNode.childNodes[0];
+					}					
 					if ( childNode.tagName === 'LABEL' ) {
-						var labelChildNode = childNode.childNodes[0];
-						if ( labelChildNode.tagName === 'INPUT' ) {
+						var inputChildNode = childNode.childNodes[0];
+						if ( inputChildNode.tagName === 'INPUT' ) {
 
 							// Name must be common across group
 
-							labelChildNode.setAttribute( 'name', widget.getAttribute( 'id' ) );
+							inputChildNode.setAttribute( 'name', widget.getAttribute( 'id' ) );
 
 							if ( attributes.type === 'array' ) {
-								labelChildNode.checked = ( value !== undefined && value.indexOf( labelChildNode.value ) !== -1 );
+								inputChildNode.checked = ( value !== undefined && value.indexOf( inputChildNode.value ) !== -1 );
 							} else if ( attributes.type === 'boolean' ) {
-								labelChildNode.checked = ( value === labelChildNode.value || labelChildNode.value === '' + value );
+								inputChildNode.checked = ( value === inputChildNode.value || inputChildNode.value === '' + value );
 							} else {
-								labelChildNode.checked = ( value === labelChildNode.value );
+								inputChildNode.checked = ( value === inputChildNode.value );
 							}
 						}
 					}
@@ -438,22 +441,26 @@ var metawidget = metawidget || {};
 
 			if ( binding.attributes.type === 'array' || binding.attributes.componentType !== undefined ) {
 
-				var toReturn = [];
+				var toReturn;
 				for ( var loop = 0, length = widget.childNodes.length; loop < length; loop++ ) {
 					var childNode = widget.childNodes[loop];
+					if ( childNode.tagName === 'DIV' ) {
+						childNode = childNode.childNodes[0];
+					}					
 					if ( childNode.tagName === 'LABEL' ) {
-						var labelChildNode = childNode.childNodes[0];
-						if ( labelChildNode.checked ) {
+						var inputChildNode = childNode.childNodes[0];
+						if ( inputChildNode.checked ) {
 
 							if ( binding.attributes.type === 'boolean' ) {
-								return ( labelChildNode.value === true || labelChildNode.value === 'true' );
+								return ( inputChildNode.value === true || inputChildNode.value === 'true' );
 							}
 
 							if ( binding.attributes.type !== 'array' ) {
-								return labelChildNode.value;
+								return inputChildNode.value;
 							}
 
-							toReturn.push( labelChildNode.value );
+							toReturn = toReturn || [];
+							toReturn.push( inputChildNode.value );
 						}
 					}
 				}

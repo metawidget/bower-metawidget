@@ -1,4 +1,4 @@
-// Metawidget 4.1
+// Metawidget 4.2
 //
 // This file is dual licensed under both the LGPL
 // (http://www.gnu.org/licenses/lgpl-2.1.html) and the EPL
@@ -326,7 +326,6 @@ var metawidget = metawidget || {};
 		var _headerStyleClass = config !== undefined ? config.headerStyleClass : undefined;
 		var _footerStyleClass = config !== undefined ? config.footerStyleClass : undefined;
 		var _numberOfColumns = config !== undefined && config.numberOfColumns ? config.numberOfColumns : 1;
-		var _currentColumn = 0;
 
 		this.startContainerLayout = function( container, mw ) {
 
@@ -342,6 +341,7 @@ var metawidget = metawidget || {};
 				table.setAttribute( 'class', _tableStyleClass );
 			}
 
+			container._currentColumn = 0;
 			container.appendChild( table );
 
 			// Facets
@@ -410,8 +410,8 @@ var metawidget = metawidget || {};
 
 			var spanAllColumns = metawidget.util.isSpanAllColumns( attributes );
 
-			if ( spanAllColumns === true && _currentColumn > 0 ) {
-				_currentColumn = 0;
+			if ( spanAllColumns === true && container._currentColumn > 0 ) {
+				container._currentColumn = 0;
 			}
 
 			// Id
@@ -442,7 +442,7 @@ var metawidget = metawidget || {};
 			var tbody = table.childNodes[table.childNodes.length - 1];
 			var tr;
 
-			if ( _currentColumn === 0 ) {
+			if ( container._currentColumn === 0 ) {
 				tr = metawidget.util.createElement( mw, 'tr' );
 				if ( idPrefix !== undefined ) {
 					tr.setAttribute( 'id', idPrefix + '-row' );
@@ -484,10 +484,10 @@ var metawidget = metawidget || {};
 			// Next column
 
 			if ( spanAllColumns === true ) {
-				_currentColumn = _numberOfColumns - 1;
+				container._currentColumn = _numberOfColumns - 1;
 			}
 
-			_currentColumn = ( _currentColumn + 1 ) % _numberOfColumns;
+			container._currentColumn = ( container._currentColumn + 1 ) % _numberOfColumns;
 		};
 
 		this.layoutLabel = function( tr, idPrefix, widget, elementName, attributes, mw ) {
@@ -823,18 +823,20 @@ var metawidget = metawidget || {};
 			throw new Error( 'Constructor called as a function' );
 		}
 
+		var _level = config !== undefined && config.level !== undefined ? config.level : 1;
+		
 		metawidget.layout.createFlatSectionLayoutDecorator( config, this, 'headingTagLayoutDecorator' );
-	};
 
-	metawidget.layout.HeadingTagLayoutDecorator.prototype.addSectionWidget = function( section, level, attributes, container, mw ) {
-
-		var h1 = metawidget.util.createElement( mw, 'h' + ( level + 1 ) );
-		h1.innerHTML = section;
-
-		this.getDelegate().layoutWidget( h1, "property", {
-			wide: 'true'
-		}, container, mw );
-	};
+		this.addSectionWidget = function( section, level, attributes, container, mw ) {
+	
+			var h1 = metawidget.util.createElement( mw, 'h' + ( level + _level ) );
+			h1.innerHTML = section;
+	
+			this.getDelegate().layoutWidget( h1, "property", {
+				wide: 'true'
+			}, container, mw );
+		};
+	}
 
 	/**
 	 * @class LayoutDecorator to decorate widgets from different sections using
@@ -847,17 +849,24 @@ var metawidget = metawidget || {};
 			throw new Error( 'Constructor called as a function' );
 		}
 
+		var _styleClass = config !== undefined ? config.styleClass : undefined;
+		
 		metawidget.layout.createNestedSectionLayoutDecorator( config, this, 'divLayoutDecorator' );
-	};
+		
+		this.createSectionWidget = function( previousSectionWidget, section, attributes, container, mw ) {
 
-	metawidget.layout.DivLayoutDecorator.prototype.createSectionWidget = function( previousSectionWidget, section, attributes, container, mw ) {
-
-		var div = metawidget.util.createElement( mw, 'div' );
-		div.setAttribute( 'title', section );
-		this.getDelegate().layoutWidget( div, "property", {
-			wide: 'true'
-		}, container, mw );
-
-		return div;
+			var div = metawidget.util.createElement( mw, 'div' );
+			div.setAttribute( 'title', section );
+			
+			if ( _styleClass !== undefined ) {
+				div.setAttribute( 'class', _styleClass );
+			}
+			
+			this.getDelegate().layoutWidget( div, "property", {
+				wide: 'true'
+			}, container, mw );
+	
+			return div;
+		}
 	};
 } )();

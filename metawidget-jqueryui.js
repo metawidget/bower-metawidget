@@ -1,4 +1,4 @@
-// Metawidget 4.1
+// Metawidget 4.2
 //
 // This file is dual licensed under both the LGPL
 // (http://www.gnu.org/licenses/lgpl-2.1.html) and the EPL
